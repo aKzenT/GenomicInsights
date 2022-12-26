@@ -1,0 +1,19 @@
+---
+version: '3'
+
+services:
+  blast_microservice:
+    build: .
+    image: blast_microservice:latest
+    volumes:
+      - ../../data/BLAST_DATABASES/db/:/blast/db/
+      - ../../data/results/:/blast/results/
+      - ../../data/raw/:/blast/raw/
+    restart: always
+
+
+networks:
+  default:
+    name: distributed_system_network
+    external: true
+

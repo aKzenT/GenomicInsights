@@ -1,0 +1,18 @@
+---
+version: '3'
+
+services:
+  gc_microservice:
+    build: .
+    image: gccontent_microservice:latest
+    volumes:
+      - ../../data/raw/:/raw/
+      - ../../data/results/:/results/
+    restart: always
+
+
+networks:
+  default:
+    name: distributed_system_network
+    external: true
+

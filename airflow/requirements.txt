@@ -1,0 +1,3 @@
+confluent-kafka
+airflow-provider-kafka
+kafka-python

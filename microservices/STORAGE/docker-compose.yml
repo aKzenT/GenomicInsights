@@ -1,0 +1,20 @@
+---
+version: '3'
+
+services:
+  api_microservice:
+    build: .
+    image: api_microservice:latest
+    volumes:
+      - ../../data/raw/:/raw/
+      - ../../data/report/:/report/
+    ports:
+      - 5001:5000
+    restart: always
+
+
+networks:
+  default:
+    name: distributed_system_network
+    external: true
+
