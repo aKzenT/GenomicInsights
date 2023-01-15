@@ -4,12 +4,12 @@ version: '3'
 services:
   api_microservice:
     build: .
-    image: api_microservice:latest
+    image: storage_microservice:latest
     volumes:
       - ../../data/raw/:/raw/
       - ../../data/report/:/report/
     ports:
-      - 5001:5000
+      - 5000:5000
     restart: always
 
 

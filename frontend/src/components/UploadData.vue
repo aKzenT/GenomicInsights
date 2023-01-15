@@ -6,7 +6,7 @@
           <el-upload
     class="upload-demo"
     drag
-    action='http://localhost:5001/upload/'
+    action='http://localhost:5000/upload/'
     multiple
   >
     <el-icon class="el-icon--upload"><upload-filled /></el-icon>

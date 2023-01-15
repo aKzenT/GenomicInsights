@@ -22,6 +22,6 @@ const rootComponent = app
 
 
 
-app.config.globalProperties.$frontendApi = 'http://localhost:5001';
+app.config.globalProperties.$frontendApi = 'http://localhost:5000';
 app.config.globalProperties.$airflowApi = 'http://localhost:8080';
 
