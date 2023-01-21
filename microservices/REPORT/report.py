@@ -128,7 +128,7 @@ def report_gc(pdf, result_file):
     plt.plot(xaxis, yaxis)
 
     buf = io.BytesIO()
-    plt.savefig(buf)
+    plt.savefig(buf, dpi=300)
     buf.seek(0)
     PIL.Image.open(buf)
 
