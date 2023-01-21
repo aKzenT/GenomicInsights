@@ -6,7 +6,7 @@ services:
     build: .
     image: blast_microservice:latest
     volumes:
-      - ../../data/BLAST_DATABASES/db/:/blast/db/
+      - ../../data/BLAST_DATABASES/:/blast/db/
       - ../../data/results/:/blast/results/
       - ../../data/raw/:/blast/raw/
     restart: always
