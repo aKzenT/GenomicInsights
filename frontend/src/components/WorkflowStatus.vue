@@ -91,7 +91,7 @@ export default {
             username: "airflow",
             password: "airflow",
           },
-          withCredentials: true,
+          withCredentials: false,
         })
         .then((response) => {
           for (var index in response.data.tasks) {
@@ -123,7 +123,7 @@ export default {
               username: "airflow",
               password: "airflow",
             },
-            withCredentials: true,
+            withCredentials: false,
           }
         )
         .then((response) => {
