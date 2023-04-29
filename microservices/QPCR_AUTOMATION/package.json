@@ -1,0 +1,20 @@
+{
+  "name": "automatic_qpcr_analysis",
+  "version": "1.0.0",
+  "description": "Automatic processing of a complete qpcr analysis including the calculation and the creation and mailing  of the created report. ",
+  "main": "automatic_qpcr_analysis.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kathrin Mueller",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "node-libcurl": "^3.0.0",
+    "node-rdkafka": "^2.15.0",
+    "nodemailer": "^6.9.1",
+    "querystring": "^0.2.1"
+  }
+}

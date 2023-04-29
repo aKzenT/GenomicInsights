@@ -3,3 +3,11 @@
 node_modules
 dist
 .nuxt
+
+microservices/QPCR_AUTOMATION/node_modules
+microservices/QPCR_AUTOMATION/.env
+airflow/logs/**
+airflow/qpcr_automation/**
+airflow/qpcr_automation_store/**/*
+data/**/*
+airflow/.env
