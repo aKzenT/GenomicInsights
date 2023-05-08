@@ -4,7 +4,9 @@ import json
 from airflow.operators.python_operator import PythonOperator
 from airflow.contrib.sensors.file_sensor import FileSensor
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
-from kafka import KafkaProducer
+from kafka import KafkaProducer, KafkaConsumer
+from airflow.sensors.python import PythonSensor
+
 from datetime import datetime, timedelta
 
 import shutil
@@ -33,7 +35,48 @@ def qpcr_automation_request():
         shutil.move(os.path.join(source_dir, new_file_name), target_dir)
         # Produce event and send filename to consumer
         kafka_producer = KafkaProducer(bootstrap_servers=['kafka_kafka_1:9092'])
-        kafka_producer.send('qpcr_automation_requested', value=json.dumps({"file":new_file_name}).encode('gbk'))
+        kafka_producer.send('qpcr_automation_requested', value=json.dumps({"file":new_file_name, "request":"analyze"}).encode('gbk'))
+
+def analyze_sensor():
+    kafka_consumer = KafkaConsumer(    
+        'analyze_finished',
+        bootstrap_servers = ['kafka_kafka_1:9092'],  
+        group_id = 'kafka',  
+        enable_auto_commit = True,
+     )  
+    for message in kafka_consumer:
+        print(message.value)
+        return True
+    
+def report_request():
+    kafka_producer = KafkaProducer(bootstrap_servers=['kafka_kafka_1:9092'])
+    kafka_producer.send('qpcr_automation_requested', value=json.dumps({"request":"report"}).encode('gbk'))
+
+def report_sensor():
+    kafka_consumer = KafkaConsumer(    
+        'report_finished',
+        bootstrap_servers = ['kafka_kafka_1:9092'],  
+        group_id = 'kafka',  
+        enable_auto_commit = True,
+     )  
+    for message in kafka_consumer:
+        print(message.value)
+        return True
+
+def email_request():
+    kafka_producer = KafkaProducer(bootstrap_servers=['kafka_kafka_1:9092'])
+    kafka_producer.send('qpcr_automation_requested', value=json.dumps({"request":"email"}).encode('gbk'))
+
+def email_sensor():
+    kafka_consumer = KafkaConsumer(    
+        'email_sent',
+        bootstrap_servers = ['kafka_kafka_1:9092'],  
+        group_id = 'kafka',  
+        enable_auto_commit = True,
+     )  
+    for message in kafka_consumer:
+        print(message.value)
+        return True
 
 with airflow.DAG(
         'QPCR_Automation',
@@ -54,11 +97,38 @@ with airflow.DAG(
         dag=dag
     ) 
 
-    t3 = TriggerDagRunOperator(
+    t3 = PythonSensor(
+        task_id="analyze_finished",     
+        python_callable=analyze_sensor,
+    )
+
+    t4 = PythonOperator(
+        task_id='report_request',
+        python_callable=report_request,
+        dag=dag
+    ) 
+
+    t5 = PythonSensor(
+        task_id="report_finished",     
+        python_callable=report_sensor,
+    )
+
+    t6 = PythonOperator(
+        task_id='email_request',
+        python_callable=email_request,
+        dag=dag
+    )
+
+    t7 = PythonSensor(
+        task_id="email_sent",     
+        python_callable=email_sensor,
+    )
+
+    t8 = TriggerDagRunOperator(
         task_id='reschedule_dag',
         trigger_dag_id='QPCR_Automation',
         reset_dag_run=True,
         dag=dag
-    )
+    ) 
     
-    t1 >> t2 >> t3
+    t1 >> t2 >> t3 >> t4 >> t5 >> t6 >> t7 >> t8
