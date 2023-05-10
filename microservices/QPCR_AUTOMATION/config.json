@@ -1,6 +1,7 @@
 {   
     "watch_directory": "../../airflow/qpcr_automation_store",
     "report_directory": "../../airflow/qpcr_automation_store/reports",
+    "json_directory": "../../airflow/qpcr_automation_store/json_store",
     "apiURL": "http://127.0.0.1:5022",
     "analysisID": 1
 }

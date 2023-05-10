@@ -4,9 +4,13 @@ import {Curl} from 'node-libcurl';
 import querystring from 'querystring';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import Kafka from 'node-rdkafka';
+
 
 // Read configuration data
 const config = JSON.parse(fs.readFileSync('./config.json'));
+
+
 
 function qpcr_automation(file) {
     dotenv.config();
@@ -23,31 +27,47 @@ function qpcr_automation(file) {
 
     curlRequest.on("end", function (statusCode, data, headers) {
         //Store json response
-        requestReport(data, config, file);
+        // requestReport(data, config, file);
+        const fileName = file.split('.')[0]+ '.json';
+        fs.writeFileSync(`${config.json_directory}/${fileName}`, data)
+
+        const stream = Kafka.Producer.createWriteStream({
+          'metadata.broker.list': 'localhost:29092'
+        },  {}, {
+          topic: 'analyze_finished'
+        });
+        stream.write(Buffer.from('Analyze finished'));
       this.close();
     });
     curlRequest.on("error", terminate);
     curlRequest.perform();
   }
 
-export default {qpcr_automation};
-
 // Request to report endpoint
-function requestReport(analysisResults, config, file) {
+function requestReport() {
+    dotenv.config();
     const curlReport = new Curl();
     const terminate = curlReport.close.bind(curlReport);
+
+    const file = fs.readdirSync(`${config.json_directory}`)[0];
+    const analysisResults = JSON.stringify(JSON.parse(fs.readFileSync(`${config.json_directory}/${file}`)));
 
     curlReport.setOpt(Curl.option.URL, `${config.apiURL}/report?id=${config.analysisID}`);
     curlReport.setOpt(Curl.option.POST, true);
     curlReport.setOpt(Curl.option.POSTFIELDS, querystring.stringify({
-        req: analysisResults,
+        "req": analysisResults,
       }));
 
     curlReport.on("end", function(statusCode, data, headers) {
         // Store response in html file
         const reportName = file.split('.')[0] + '_report.html';
         fs.writeFileSync(`${config.report_directory}/${reportName}`, data)
-        sendEmail(`${config.report_directory}/${reportName}`);
+        const stream = Kafka.Producer.createWriteStream({
+          'metadata.broker.list': 'localhost:29092'
+        },  {}, {
+          topic: 'report_finished'
+        });
+        stream.write(Buffer.from('Report created'));
         this.close();
     });
     curlReport.on("error", terminate);
@@ -57,7 +77,10 @@ function requestReport(analysisResults, config, file) {
 
 // Send file as attachment via email
 
-function sendEmail(path) {
+function sendEmail() {
+  const file = fs.readdirSync(`${config.json_directory}`)[0];
+  const path = config.report_directory + '/' + file.split('.')[0] + '_report.html';
+
   const mailFrom = process.env.EMAIL_FROM;
   const mailTo = process.env.EMAIL_TO;
   const pw = process.env.PASSWORD;
@@ -86,7 +109,17 @@ function sendEmail(path) {
       console.log('Email sent: ' + info.response);
     }
   }); 
+
+  fs.unlinkSync(`${config.json_directory}/${file}`);
+  const stream = Kafka.Producer.createWriteStream({
+    'metadata.broker.list': 'localhost:29092'
+  },  {}, {
+    topic: 'email_sent'
+  });
+  stream.write(Buffer.from('Email sent'));
 }
+
+export default {qpcr_automation, requestReport, sendEmail};
 
 
 

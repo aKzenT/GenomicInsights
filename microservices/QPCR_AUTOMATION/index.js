@@ -13,8 +13,22 @@ consumer.on('ready', () => {
   consumer.consume();
 }).on('data', (data) => {
     const dataValue = JSON.parse(data.value.toString('utf-8'));
-    automation.qpcr_automation(dataValue.file);
+    if (dataValue.request === 'analyze') {
+      console.log('analyze');
+      automation.qpcr_automation(dataValue.file);
+    }
+    if (dataValue.request === 'report') {
+      console.log('report');
+      automation.requestReport();
+    }
+    if (dataValue.request === 'email') {
+      console.log('email');
+      automation.sendEmail();
+    }
 });
+
+
+
 
 
 
