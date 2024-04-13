@@ -13,13 +13,13 @@ import sys
 
 result_folder = os.getenv('RESULT_FOLDER', default="/results/")
 raw_folder = os.getenv('RAW_FOLDER', default="/raw/")
-kafka_url = os.getenv('KAFKA_URL', default="kafka_kafka_1:9092")
+kafka_url = os.getenv('KAFKA_URL', default="kafka-kafka-1:9092")
 
 stdout_handler = logging.StreamHandler(stream=sys.stdout)
 handlers = [stdout_handler]
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.ERROR, #can also be set to DEBUG
     format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
     handlers=handlers
 )

@@ -1,7 +1,8 @@
 <template>
   <div class="content">
     <div v-loading="!isDataLoaded" class="wrapper-steps" id="wrapper-steps">
-      <el-steps
+      <el-steps class="el-steps el-steps--vertical" 
+        direction="vertical"
         v-if="isDataLoaded"
         :active="active_step"
         finish-status="success"
@@ -20,9 +21,8 @@
         :disabled="!isWorkflowFinished"
         >Download Report<el-icon class="el-icon--right"><Download /></el-icon
       ></el-button>
-    </div>
-
-    <div id="settings">
+   </div>
+   <div id="settings">
       <el-button
         class="settings"
         id="refreshButton"
@@ -204,22 +204,18 @@ export default {
 
 <style scoped>
 .selectAnalyse {
-  height: 200px;
+  height: 300px;
 }
 .el-steps {
-  width: 80%;
-}
-
-.el-steps {
-  width: 80%;
+  direction: vertical;
 }
 
 .wrapper-steps {
-  width: 80%;
+  display:flex; 
   border: 2px lightgrey;
   border-style: solid;
   border-radius: 10px;
-  min-height: 200px;
+  min-height: 450px;
   position: relative;
   padding-top: 10px;
 }
@@ -241,8 +237,6 @@ th {
 
 #settings {
   display: flex;
-
-  width: 80%;
 }
 #switch {
   width: fit-content;

@@ -1,0 +1,14 @@
+# QIIME2 config parameters
+
+# Pretrained greengenes classifier location
+database: /db/gg_2022_10_backbone_full_length.nb.qza # location in Docker container 
+
+# DADA2 QC parameters
+trunc_len_f: 280
+trunc_len_r: 280
+trim_left_f: 0
+trim_left_r: 0
+p_min_fold_parent_over_abundance: 2
+
+# diversity parameters
+sampling_depth: 300

@@ -31,7 +31,7 @@ default_args = {
 def python_sensor(run_id):
     kafka_consumer = KafkaConsumer(    
         'gc_report',
-        bootstrap_servers = ['kafka_kafka_1:9092'],  
+        bootstrap_servers = ['kafka-kafka-1:9092'],
         group_id = run_id,  
         enable_auto_commit = True,
      )  
@@ -46,7 +46,7 @@ def python_sensor(run_id):
 def report_sensor(run_id):
     kafka_consumer = KafkaConsumer(    
         'report',
-        bootstrap_servers = ['kafka_kafka_1:9092'],  
+        bootstrap_servers = ['kafka-kafka-1:9092'],
         group_id = run_id,  
         enable_auto_commit = True,
      )  
@@ -60,12 +60,12 @@ def report_sensor(run_id):
              
     
 def produce_gc_request(run_id, file):
-    kafka_producer = KafkaProducer(bootstrap_servers=['kafka_kafka_1:9092'])
+    kafka_producer = KafkaProducer(bootstrap_servers=['kafka-kafka-1:9092'])
     kafka_producer.send('gc_analyzer', value=json.dumps({"id":run_id,"file":file}).encode('gbk'))
 
 
 def produce_report_request(run_id, file):
-    kafka_producer = KafkaProducer(bootstrap_servers=['kafka_kafka_1:9092'])
+    kafka_producer = KafkaProducer(bootstrap_servers=['kafka-kafka-1:9092'])
     kafka_producer.send('report', value=json.dumps({"id":run_id,"file":file,"workflow":"gc"}).encode('gbk'))
 
 

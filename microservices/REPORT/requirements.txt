@@ -2,3 +2,5 @@ confluent-kafka
 kafka-python
 fpdf2
 matplotlib
+pandas
+hugchat

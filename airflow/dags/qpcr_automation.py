@@ -34,13 +34,13 @@ def qpcr_automation_request():
             os.remove(os.path.join(target_dir, new_file_name))
         shutil.move(os.path.join(source_dir, new_file_name), target_dir)
         # Produce event and send filename to consumer
-        kafka_producer = KafkaProducer(bootstrap_servers=['kafka_kafka_1:9092'])
+        kafka_producer = KafkaProducer(bootstrap_servers=['kafka-kafka-1:9092'])
         kafka_producer.send('qpcr_automation_requested', value=json.dumps({"file":new_file_name, "request":"analyze"}).encode('gbk'))
 
 def analyze_sensor():
     kafka_consumer = KafkaConsumer(    
         'analyze_finished',
-        bootstrap_servers = ['kafka_kafka_1:9092'],  
+        bootstrap_servers = ['kafka-kafka-1:9092'],
         group_id = 'kafka',  
         enable_auto_commit = True,
      )  
@@ -49,13 +49,13 @@ def analyze_sensor():
         return True
     
 def report_request():
-    kafka_producer = KafkaProducer(bootstrap_servers=['kafka_kafka_1:9092'])
+    kafka_producer = KafkaProducer(bootstrap_servers=['kafka-kafka-1:9092'])
     kafka_producer.send('qpcr_automation_requested', value=json.dumps({"request":"report"}).encode('gbk'))
 
 def report_sensor():
     kafka_consumer = KafkaConsumer(    
         'report_finished',
-        bootstrap_servers = ['kafka_kafka_1:9092'],  
+        bootstrap_servers = ['kafka-kafka-1:9092'],
         group_id = 'kafka',  
         enable_auto_commit = True,
      )  
@@ -64,13 +64,13 @@ def report_sensor():
         return True
 
 def email_request():
-    kafka_producer = KafkaProducer(bootstrap_servers=['kafka_kafka_1:9092'])
+    kafka_producer = KafkaProducer(bootstrap_servers=['kafka-kafka-1:9092'])
     kafka_producer.send('qpcr_automation_requested', value=json.dumps({"request":"email"}).encode('gbk'))
 
 def email_sensor():
     kafka_consumer = KafkaConsumer(    
         'email_sent',
-        bootstrap_servers = ['kafka_kafka_1:9092'],  
+        bootstrap_servers = ['kafka-kafka-1:9092'],
         group_id = 'kafka',  
         enable_auto_commit = True,
      )  

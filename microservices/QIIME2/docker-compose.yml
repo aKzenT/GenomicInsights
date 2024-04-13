@@ -1,0 +1,19 @@
+---
+version: '3'
+
+services:
+  qiime2_microservice:
+    build: .
+    image: qiime2_microservice:latest
+    volumes:
+      - ../../data/QIIME2_DATABASES/:/db/
+      - ../../data/raw/:/raw/
+      - ../../data/results/:/results/
+    restart: always
+
+
+networks:
+  default:
+    name: distributed_system_network
+    external: true
+

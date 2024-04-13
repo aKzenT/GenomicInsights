@@ -1,4 +1,3 @@
-
 from time import sleep
 from json import dumps, loads
 import logging
@@ -14,10 +13,14 @@ import statistics
 import io
 import matplotlib.pyplot as plt
 import PIL
+import time
+
+#import self-written helper functions
+from report_helper import create_LLM_report
 
 result_folder = os.getenv('RESULT_FOLDER', default="/results/")
 report_folder = os.getenv('RAW_FOLDER', default="/report/")
-kafka_url = os.getenv('KAFKA_URL', default="kafka_kafka_1:9092")
+kafka_url = os.getenv('KAFKA_URL', default="kafka-kafka-1:9092")
 
 
 a4_width_mm = 210
@@ -32,7 +35,7 @@ stdout_handler = logging.StreamHandler(stream=sys.stdout)
 handlers = [stdout_handler]
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.ERROR, #can also be set to DEBUG
     format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
     handlers=handlers
 )
@@ -75,7 +78,10 @@ def create_report(data):
     elif (data_json['workflow'] == "gc"):
         result_pdf = report_gc(pdf, result_file)
 
-    result_pdf.output(report_file, 'F')
+    elif (data_json['workflow'] == "qiime2"):
+        result_pdf = report_qiime2(pdf, result_file)
+
+    result_pdf.output(report_file)#, 'F') # dest = 'F' is deprecated 
 
     sleep(10)
     kafka_producer.send('report', key=b'Report', value=json.dumps(
@@ -84,12 +90,15 @@ def create_report(data):
 
 
 def create_pdf():
-
     pdf = FPDF(orientation='P', unit='mm', format='A4')
     pdf.set_auto_page_break(True, margin=margin_bottom_mm)
     pdf.add_page()
     return pdf
 
+def report_qiime2(pdf, result_file):
+    result_file = result_file + "/" 
+    pdf = create_LLM_report(result_path = str(result_file), pdf = pdf, width_text = width_text, a4_width_mm = a4_width_mm)
+    return pdf
 
 def report_blast(pdf, result_file):
 
@@ -149,6 +158,5 @@ def report_gc(pdf, result_file):
 for message in kafka_consumer:
     if ('Status' in json.loads(message.value.decode("utf-8"))):
         continue
-    Thread(target=create_report, args=(
-        message.value.decode("utf-8"),), daemon=True).start()
+    Thread(target=create_report, args=(message.value.decode("utf-8"),), daemon=True).start()
     sleep(5)
