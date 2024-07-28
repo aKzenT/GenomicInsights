@@ -61,7 +61,7 @@ The metadata.tsv file has to have one row per sample, and the first column has t
 
 In addition to the input data, a pretrained feature classifier is needed. It has to be located in the data/QIIME2_DATABASES/ directory and the path including the filename of the pretrained classifier have to be provided in the qiime2config.yml file. This file is located in microservices/QIIME2/ and also takes additional configuarion parameters for the QIIME2 analysis, like quality control parameters. 
 
-The last input is the expert knowledge, which is sent to the LLM for textual report generation. Expert knowledge can contain any information that you would like to give to the LLM for specify the background knowledge about microbiome compositions, specific diseases, or recommended actions to give. This information is located in microservices/REPORT/qiime2_expert_knowledge.txt. 
+The last input is the expert knowledge, which is sent to the LLM for textual report generation. Expert knowledge can contain any information that you would like to give to the LLM for specify the background knowledge about microbiome compositions, specific diseases, or recommended actions to give. This information is located in microservices/REPORT/expert_knowledge.txt. 
 
 ## Running qPCR analysis workflow
 TODO

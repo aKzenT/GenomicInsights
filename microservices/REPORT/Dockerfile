@@ -13,7 +13,7 @@ RUN cd ..
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
-COPY qiime2_expert_knowledge.txt /script/qiime2_expert_knowledge.txt
+COPY expert_knowledge.txt /script/expert_knowledge.txt
 COPY report_helper.py /script/report_helper.py
 COPY report.py /script/report.py
 

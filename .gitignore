@@ -10,3 +10,4 @@ airflow/qpcr_automation/
 airflow/qpcr_automation_store/
 data/
 airflow/.env
+microservices/REPORT/.env

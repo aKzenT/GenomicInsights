@@ -4,3 +4,9 @@ fpdf2
 matplotlib
 pandas
 hugchat
+transformers
+torch
+sentencepiece
+protobuf
+python-dotenv
+openai
