@@ -10,7 +10,8 @@ def get_provider() -> LLMProvider:
     provider = os.getenv('PROVIDER')
     if provider == 'local':
         from llm_providers.local_provider import LocalProvider
-        return LocalProvider()
+        model = os.getenv('LOCAL_MODEL')
+        return LocalProvider(model)
     elif provider == 'openai':
         from llm_providers.openai_provider import OpenAIProvider
         assistant_id = os.getenv('OPENAI_ASSISTANT_ID')

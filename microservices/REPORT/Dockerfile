@@ -14,8 +14,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
 COPY expert_knowledge.txt /script/expert_knowledge.txt
-COPY report_helper.py /script/report_helper.py
-COPY report.py /script/report.py
+COPY src /script
 
 CMD [ "python3", "/script/report.py"]
 

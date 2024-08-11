@@ -23,7 +23,8 @@ default_args = {
     "retry_delay": timedelta(minutes=5),
 }
 
-
+logger = logging.getLogger(__name__)
+logger.info("QIIME2 Microbiome Analysis DAG started")
 #consumer_logger = logging.getLogger("airflow")
 
 def python_sensor(run_id, topic):
@@ -34,12 +35,14 @@ def python_sensor(run_id, topic):
         enable_auto_commit = True
      )  
     for message in kafka_consumer:
+        logger.info("Received message from %s for run_id %s: %s", topic, run_id, message.value)
+
         message_json = json.loads(message.value)
         if message_json['id'] == run_id and 'Status' in message_json:
             if message_json['Status'] == "successfull":
                 print("Analysis done")
                 return True
-            elif message_json['Status'] == "error":
+            elif message_json['Status'] == "error":                
                 raise AirflowFailException("Analysis failed with Error")
 
 
@@ -51,21 +54,30 @@ def report_sensor(run_id):
         enable_auto_commit = True
      )  
     for message in kafka_consumer:
+        logger.info("Received message from %s for run_id %s: %s", 'report', run_id, message.value)
+
         message_json = json.loads(message.value)
-        if message_json['id'] == run_id and 'Status' in message_json and message_json['Status'] == "successfull":
-            print("Report done")
-            return True
-             
+        if message_json['id'] == run_id and 'Status' in message_json:
+            if message_json['Status'] == "successfull":
+                print("Report done")
+                return True             
+            elif message_json['Status'] == "error":                
+                raise AirflowFailException("Report creation failed with Error")
     
 def produce_qiime2microbiome_request(run_id, file):
+    logger.info("Producing message: %s, %s, %s", run_id, file, "StartAnalysis")
+
     kafka_producer = KafkaProducer(bootstrap_servers=['kafka-kafka-1:9092'])
     kafka_producer.send('qiime2_analyzer', value=json.dumps({"id":run_id,"file":file,"Call":"StartAnalysis"}).encode('gbk'))
 
 def produce_sampleclassification_request(run_id, file):
+    logger.info("Producing message: %s, %s, %s", run_id, file, "StartClassification")
+
     kafka_producer = KafkaProducer(bootstrap_servers=['kafka-kafka-1:9092'])
     kafka_producer.send('qiime2_analyzer', value=json.dumps({"id":run_id,"file":file,"Call":"StartClassification"}).encode('gbk')) 
 
 def produce_report_request(run_id, file):
+    logger.info("Producing report request: %s, %s, %s", run_id, file, "qiime2")
     kafka_producer = KafkaProducer(bootstrap_servers=['kafka-kafka-1:9092'])
     kafka_producer.send('report', value=json.dumps({"id":run_id,"file":file,"workflow":"qiime2"}).encode('gbk'))
 

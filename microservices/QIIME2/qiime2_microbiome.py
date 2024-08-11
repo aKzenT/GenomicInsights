@@ -22,7 +22,7 @@ stdout_handler = logging.StreamHandler(stream=sys.stdout)
 handlers = [stdout_handler]
 
 logging.basicConfig(
-    level=logging.ERROR, #can also be set to DEBUG
+    level=logging.DEBUG, #can also be set to DEBUG
     format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
     handlers=handlers
 )
@@ -54,16 +54,17 @@ def analyze_qiime2(data):
         data_json['file']+"_"+data_json['id']
     
     #perform analysis in QIIME2
-    subp_res = subprocess.run(["/script/run_qiime2_analysis.sh", str(file), str(result_file)])
+    subp_res = subprocess.run(["/script/run_qiime2_analysis.sh", str(file), str(result_file)], capture_output=True, text=True)
 
-    print(subp_res)
+    print(subp_res.stdout)
+    print(subp_res.stderr)
     print(subp_res.returncode)
 
     if subp_res.returncode != 0:
         #exit with error 
         time.sleep(15) #sleep is needed for the error case --> otherwise it's too fast for kafka to handle events
 
-        kafka_producer.send('qiime2_analysis_started', key=b'Report_QIIME2', value=json.dumps({"id":data_json['id'], "Status":"error"}).encode('gbk'))         
+        kafka_producer.send('qiime2_analysis_started', key=b'Report_QIIME2', value=json.dumps({"id":data_json['id'], "Status":"error", 'stdout':subp_res.stdout, 'stderr':subp_res.stderr}).encode('gbk'))         
     else:
         #create barplot with python functionality defined in qiime_helpers.py
         #create directory                 

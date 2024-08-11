@@ -7,8 +7,6 @@ class HuggingFaceProvider(LLMProvider):
         sign = Login(username, password)
         self.cookies = sign.login()
 
-        None
-
     def query(self, prompt: str) -> str:
         chatbot = hugchat.ChatBot(cookies=self.cookies.get_dict())
         query_result = chatbot.chat(prompt, retry_count=5, web_search=False)

@@ -5,17 +5,26 @@ RUN mkdir /db /raw /results /script
 
 COPY requirements.txt .
 
-RUN apt-get clean && apt-get update && apt-get install build-essential python3-dev git wget software-properties-common ca-certificates -y
-RUN git clone https://github.com/edenhill/librdkafka
-RUN cd librdkafka && ./configure && make && make install && ldconfig
-RUN cd ..
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements.txt
-#RUN git clone https://github.com/sbslee/dokdo
-#RUN pip install dokdo/
-#RUN rm -rf dokdo/
 
-#RUN conda activate qiime2-amplicon-2023.9 #activate QIIME2 conda environment 
+# Install necessary dependencies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    build-essential \
+    python3-dev \
+    git \
+    wget \
+    software-properties-common \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install librdkafka
+RUN git clone https://github.com/edenhill/librdkafka && \
+    cd librdkafka && \
+    ./configure && make && make install && ldconfig
+
+# Upgrade pip and install Python packages
+RUN pip3 install --upgrade pip
+RUN pip3 install --root-user-action ignore -r requirements.txt
 
 COPY qiime2_helpers.py /script/qiime2_helpers.py
 COPY qiime2config.yml /script/qiime2config.yml

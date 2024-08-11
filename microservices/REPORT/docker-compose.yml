@@ -9,6 +9,7 @@ services:
       - ../../data/results/:/results/
       - ../../data/report/:/report/
     restart: always
+    env_file: ".env"
 
 
 networks:

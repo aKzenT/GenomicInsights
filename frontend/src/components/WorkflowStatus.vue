@@ -9,9 +9,10 @@
         align-center
       >
         <el-step
-          v-for="step in dag_task_order"
+          v-for="(step,index) in dag_task_order"
           :key="step"
           :title="step"
+          :status="index == active_step ? processState : undefined"
         ></el-step>
       </el-steps>
       <el-button
@@ -73,6 +74,7 @@ export default {
     dag_task_order: [],
     isWorkflowFinished: false,
     file: "",
+    processState: "process",
   }),
 
   methods: {
@@ -129,10 +131,14 @@ export default {
         .then((response) => {
           this.dag_data = response.data.task_instances;
           var active_step = 0;
+          this.processState = "process";
 
           for (var index in response.data.task_instances) {
-            if (response.data.task_instances[index].state == "success") {
+            const state = response.data.task_instances[index].state;
+            if (state == "success") {
               active_step++;
+            } else if (state == "failed") {
+              this.processState = "error";
             }
           }
 
