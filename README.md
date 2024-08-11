@@ -41,7 +41,7 @@ To run a BLAST analysis, choose the BLAST workflow and select one of the example
 ## Running GC Content analysis
 For the GC Content workflow, you should download a large FASTQ file for analysis. You can use the SRS012969 example file from the Human Microbiome Project which you can find here: https://portal.hmpdacc.org/files/596fc2de57601ec08a01fdee59b509b1 . After downloading the file and extracting the contents, you can upload the SRS012969.denovo_duplicates_marked.trimmed.1.fastq file to the web application. Alternatively, you can copy the data directly to the data/RAW directory. After submitting, you can watch the progress in Apache Airflow again. Keep in mind that the GC Content workflow takes a long time to run (about 40mins on my machine). After the workflow is finished, you can download the results from the web application.
 
-## Running QIIME2 microbiome analysis
+## Running QIIME2 microbiome analysis ("MicroFlow")
 For the QIIME2 microbiome analysis workflow, demultiplexed FASTQ files in Casava 1.8 paired-end format are needed as input. That means that there are two FASTQ files per sample (forward reads and reverse reads). In addition, a metadata.tsv file can be provided to provide additional patient/sample information for each sample. The required folder structure for input data looks like this:
 
 ```bash
