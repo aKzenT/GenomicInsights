@@ -60,6 +60,11 @@ logger.info(kafka_consumer.beginning_offsets)
 
 kafka_producer = KafkaProducer(bootstrap_servers=kafka_brokers)
 
+for message in kafka_consumer:
+    if ('Status' in json.loads(message.value.decode("utf-8"))):
+        continue
+    Thread(target=create_report, args=(message.value.decode("utf-8"),), daemon=True).start()
+    sleep(5)
 
 def create_report(data):
     logger.info("starting report " + data)
@@ -160,8 +165,3 @@ def report_gc(pdf, result_file):
     return pdf
 
 
-for message in kafka_consumer:
-    if ('Status' in json.loads(message.value.decode("utf-8"))):
-        continue
-    Thread(target=create_report, args=(message.value.decode("utf-8"),), daemon=True).start()
-    sleep(5)

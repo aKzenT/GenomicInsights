@@ -99,7 +99,7 @@ with DAG(
     )
 
     t2 = PythonSensor(
-        task_id="Calculating_Relative_Abundances",     
+        task_id="Microbiome_Analysis_Done",     
         python_callable=python_sensor,
         op_kwargs={"run_id":"{{ run_id }}","topic":"qiime2_analysis_started"},
     )

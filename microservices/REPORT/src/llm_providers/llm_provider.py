@@ -6,8 +6,8 @@ class LLMProvider(ABC):
     def query(self, prompt: str) -> str:
         pass
 
-def get_provider() -> LLMProvider:
-    provider = os.getenv('PROVIDER')
+def get_provider(provider: str = None) -> LLMProvider:
+    provider = provider or os.getenv('PROVIDER')
     if provider == 'local':
         from llm_providers.local_provider import LocalProvider
         model = os.getenv('LOCAL_MODEL')

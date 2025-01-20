@@ -10,8 +10,6 @@ import Kafka from 'node-rdkafka';
 // Read configuration data
 const config = JSON.parse(fs.readFileSync('./config.json'));
 
-
-
 function qpcr_automation(file) {
     dotenv.config();
 

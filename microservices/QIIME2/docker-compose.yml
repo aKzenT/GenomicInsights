@@ -9,7 +9,7 @@ services:
       - ../../data/QIIME2_DATABASES/:/db/
       - ../../data/raw/:/raw/
       - ../../data/results/:/results/
-    restart: always
+    restart: unless-stopped
 
 
 networks:

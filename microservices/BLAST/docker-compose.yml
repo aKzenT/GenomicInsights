@@ -9,7 +9,7 @@ services:
       - ../../data/BLAST_DATABASES/:/blast/db/
       - ../../data/results/:/blast/results/
       - ../../data/raw/:/blast/raw/
-    restart: always
+    restart: unless-stopped
 
 
 networks:

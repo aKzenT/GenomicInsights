@@ -42,8 +42,17 @@ kafka_consumer = KafkaConsumer(
 logger.info(kafka_consumer.bootstrap_connected)
 logger.info(kafka_consumer.beginning_offsets)
 
-
 kafka_producer = KafkaProducer(bootstrap_servers=kafka_brokers)
+
+for message in kafka_consumer:
+    message_json = json.loads(message.value)
+    if 'Call' in message_json and message_json['Call'] == "StartAnalysis":
+        Thread(target=analyze_qiime2, args=(message.value.decode("utf-8"),), daemon=True).start()
+        sleep(5)
+    elif 'Call' in message_json and message_json['Call'] == "StartClassification":
+        Thread(target=qiime2_classification, args=(message.value.decode("utf-8"),), daemon=True).start()
+        sleep(5)
+
 
 def analyze_qiime2(data):
     raw_folder
@@ -66,13 +75,9 @@ def analyze_qiime2(data):
 
         kafka_producer.send('qiime2_analysis_started', key=b'Report_QIIME2', value=json.dumps({"id":data_json['id'], "Status":"error", 'stdout':subp_res.stdout, 'stderr':subp_res.stderr}).encode('gbk'))         
     else:
-        #create barplot with python functionality defined in qiime_helpers.py
-        #create directory                 
-        Path(str(result_file) + "/" + "/python_barplots/").mkdir(parents=True, exist_ok=True)
-
         createBarplotFromQIIME2qzv(
             import_path = str(result_file) + "/" + "taxa-bar-plots.qzv", 
-            export_path = str(result_file) + "/" + "/python_barplots/") 
+            export_path = str(result_file) + "/" + "python_barplots/") 
     
         kafka_producer.send('qiime2_analysis_started', key=b'Report_QIIME2', value=json.dumps({"id":data_json['id'], "Status":"successfull"}).encode('gbk')) 
     
@@ -84,12 +89,3 @@ def qiime2_classification(data):
 
     kafka_producer.send('qiime2_classification', key=b'Classification_QIIME2', value=json.dumps({"id":data_json['id'], "Status":"successfull"}).encode('gbk')) 
 
-
-for message in kafka_consumer:
-    message_json = json.loads(message.value)
-    if 'Call' in message_json and message_json['Call'] == "StartAnalysis":
-        Thread(target=analyze_qiime2, args=(message.value.decode("utf-8"),), daemon=True).start()
-        sleep(5)
-    elif 'Call' in message_json and message_json['Call'] == "StartClassification":
-        Thread(target=qiime2_classification, args=(message.value.decode("utf-8"),), daemon=True).start()
-        sleep(5)

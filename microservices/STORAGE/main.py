@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from src import getData
 from src import uploadData
 import os
 from fastapi import File, UploadFile
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Annotated
 
 app = FastAPI()
 
@@ -21,7 +22,7 @@ app.add_middleware(
 
 rawDataPath = os.getenv("rawDataPath", default="/raw")
 reportDataPath = os.getenv("rawDataPath", default="/report")
-
+VALID_REPORT_NAME_REGEX = r"^[a-zA-Z0-9_\-\.]+$"
 
 @app.get("/")
 async def root():
@@ -29,15 +30,15 @@ async def root():
 
 
 @app.get("/getData")
-async def root():
+async def getData():
     return getData.get_files(rawDataPath)
 
 
 @app.post("/upload/")
-async def uploadFile(file: List[UploadFile] = File(...)):
+async def upload(file: List[UploadFile] = File(...)):
     return uploadData.upload(rawDataPath, file)
 
 
 @app.get("/downloadReportURL/{report}")
-async def downloadReportURL(report: str):
+async def downloadReportURL(report: Annotated[str, Query(pattern=VALID_REPORT_NAME_REGEX)]):):
     return getData.downloadReport(reportDataPath + "/" + report)

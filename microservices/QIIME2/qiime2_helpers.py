@@ -22,6 +22,7 @@ def df_column_names_unique(df):
 
 
 def createBarplotFromQIIME2qzv(import_path, export_path, level = 0):
+	Path(export_path).mkdir(parents=True, exist_ok=True)
 	Visualization.load(import_path).export_data(export_path) #unzip visualization
 	
 	if level == 0:

@@ -124,15 +124,11 @@ def create_LLM_report(result_path, pdf, width_text, a4_width_mm):
 	provider = get_provider()
 
 	for sampleID in metadata.index:
-
 		microbiome_perc_st = extract_perc_as_string(sampleID, result_path)
 
 		#skip this sampleID, because microbiome composition info was not found in results folder 
 		if microbiome_perc_st == "":
 			continue
-
-		pdf.set_font(family='Courier', size=20, style='B')
-		pdf.cell(0, 15, "Report über die Mikrobiomzusammensetzung", ln=1, align="C")
 
 		information = extract_patient_information(metadata.loc[sampleID], result_path)
 
@@ -143,6 +139,10 @@ def create_LLM_report(result_path, pdf, width_text, a4_width_mm):
 		#save LLM result to txt file
 		with open(f'{result_path}LLM_result_'+ str(sampleID) + '.txt', 'w') as f:
 			f.writelines(LLM_result)
+
+		title = "Report über die Mikrobiomzusammensetzung"
+		pdf.set_font(family='Courier', size=20, style='B')
+		pdf.cell(0, 15, title, ln=1, align="C")
 
 		#add sampleID to PDF
 		sampleIDtext = "SampleID: " + str(sampleID)

@@ -1,9 +1,11 @@
 import Kafka from 'node-rdkafka';
 import automation from  './automation.js';
 
+const config = JSON.parse(fs.readFileSync('./config.json'));
+
 const consumer = Kafka.KafkaConsumer({
   'group.id': 'kafka',
-  'metadata.broker.list': 'localhost:29092'
+  'metadata.broker.list': config['kafka_brokers']
 }, {});
 
 consumer.connect();
@@ -26,9 +28,3 @@ consumer.on('ready', () => {
       automation.sendEmail();
     }
 });
-
-
-
-
-
-

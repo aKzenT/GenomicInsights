@@ -7,7 +7,7 @@ services:
     image: frontend:latest
     ports:
       - 880:8080
-    restart: always
+    restart: unless-stopped
 
 networks:
   default:
