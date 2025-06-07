@@ -63,5 +63,144 @@ In addition to the input data, a pretrained feature classifier is needed. It has
 
 The last input is the expert knowledge, which is sent to the LLM for textual report generation. Expert knowledge can contain any information that you would like to give to the LLM for specify the background knowledge about microbiome compositions, specific diseases, or recommended actions to give. This information is located in microservices/REPORT/expert_knowledge.txt. 
 
+For the genereation of the report with LLM you need to add a .env file to the REPORT-microservice. The content should look like this:
+
+```bash
+PROVIDER=
+HUGFACE_USERNAME=
+HUGFACE_PASSWORD=
+OPENAI_API_KEY=
+OPENAI_ASSISTANT_ID=
+LOCAL_MODEL=
+```
+As provider you can use e.g. Hugging Face and you only need to provide the username and password.
+
+## Use HDFS as storage system
+
+Run 
+```shell
+git clone https://github.com/big-data-europe/docker-hadoop
+```
+
+In the docker-compose.yml file in the docker-hadoop folder add this to the datanode-configuration:
+
+```shell
+ports:
+  - "9864:9864"
+```
+
+And in the same file add this to the bottom without indentation:
+
+```shell
+networks:
+  default:
+    name: distributed_system_network
+    external: true
+```
+
+Then navigate to docker-hadoop and run:
+
+```shell
+docker compose up -d
+```
+
+## Use Archivematica as archival system
+Software dependencies: Docker Engine, Docker Compose, git and make. Please use a version of Docker Engine greater than 23.0 which includes Buildkit as the
+default builder with support for multi-stage builds and a version of Docker Compose greater than 2.17 which supports restarts of dependent services.
+
+Run
+
+```shell
+git clone https://github.com/artefactual/archivematica.git --branch qa/1.x --recurse-submodules
+```
+
+To the docker-compose.yml file in archivematica/hack add this:  
+
+```shell
+networks:
+  default:
+    name: distributed_system_network
+    external: true
+```
+at the bottom without indentation and this:
+
+```shell
+- "../../data/cache/:/home/archivematica/microbiome/"
+```
+in the same file to the volumes in archivematica-storage-service.
+
+Run the installation (and all Docker Compose) commands from within the
+`hack` directory:
+
+```shell
+cd ./archivematica/hack
+```
+
+Run the following command to create two Docker external volumes:
+
+```shell
+make create-volumes
+```
+
+Next, build the Docker images:
+
+```shell
+make build
+```
+
+Start the services with:
+
+```shell
+docker compose up -d
+```
+
+On the first run, the Archivematica services will fail because the databases
+of the Dashboard and the Storage Service have not been created. To do so, run:
+
+```shell
+make bootstrap
+```
+
+Now that the databases have been created, use the following command to restart
+only the Archivematica services:
+
+```shell
+make restart-am-services
+```
+
+You should now be able to access the Archivematica web services through the Web UIs:
+
+- **Archivematica Dashboard:** [http://127.0.0.1:62080/](http://127.0.0.1:62080/)
+- **Archivematica Storage Service:** [http://127.0.0.1:62081/](http://127.0.0.1:62081/)
+
+The default username and password is 'test'. You should change both at the first login.
+
+For more details about Archivematica installation and troubleshooting, follow [this link][archivematica-install].
+
+### Configuration for GenomicInsights
+
+Once you can access the Web UIs, you need to add the information to GenomicInsights. 
+
+In the `data/archivematica-metadata/.env` file, add the following information:
+    - **Set the IP Address:**  
+      `http://127.0.0.1:62080`
+    
+    - **API-Key:**  
+      Generate the API-Key in the Archivematica Dashboard:  
+      `Profile` → `Generate Key` → `Save`
+    
+    - **Location-UUID:**  
+      Get the location UUID from the Archivematica Storage Service:  
+      `Storage Service` → `Locations`. Find the location where the path is `/home` and copy the UUID.
+    
+    - **Set the username:**  
+      Enter the username you want to use.
+
+After completing the `.env` file, download the `processingMCP.xml` from the Archivematica Dashboard:  
+   `Dashboard` → `Administration` → `Processing Configuration` → `Download Automated`.  
+   Rename the file to `processingMCP.xml` and save it in the `data/archivematica-metadata` folder.
+
+[archivematica-install]: https://github.com/artefactual/archivematica/blob/qa/1.x/hack/README.md
+
 ## Running qPCR analysis workflow
 TODO

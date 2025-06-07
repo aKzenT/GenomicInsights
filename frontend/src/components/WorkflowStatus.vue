@@ -59,10 +59,10 @@ import { onBeforeUnmount } from "@vue/runtime-core";
 
 export default {
   components: { Download },
-
+  props: ['route'],
   data: () => ({
     isAutoReload: true,
-    isDataLoaded: false,
+    isDataLoaded: true,
     dag_id: "",
     dag_run_id: "",
     loading: true,
@@ -72,7 +72,7 @@ export default {
     active: 0,
     active_step: 0,
     dag_task_order: [],
-    isWorkflowFinished: false,
+    isWorkflowFinished: true,
     file: "",
     processState: "process",
   }),
@@ -168,12 +168,15 @@ export default {
     },
 
     downloadReport() {
-      var report_filename =
-        "report_" + this.file + "_" + this.dag_run_id + ".pdf";
+      var file = this.route.query.file;
+      const lastSlash = file.lastIndexOf('/');
+      const secondLastSlash = file.lastIndexOf('/', lastSlash - 1);
+      const folder = file.slice(secondLastSlash + 1, lastSlash);
+      var report_filename = `/microbiome-data/${folder}/REPORT/report_${folder}.pdf`;
       var report_filename_encoded = `${encodeURIComponent(report_filename)}`;
       axios
         .get(
-          this.$frontendApi + "/downloadReportURL/" + report_filename_encoded,
+          this.$frontendApi + "/downloadFileFromHDFS" + report_filename_encoded,
           { responseType: "blob" }
         )
         .then((response) => {
@@ -182,7 +185,7 @@ export default {
 
           fileLink.href = fileURL;
 
-          fileLink.setAttribute("download", report_filename);
+          fileLink.setAttribute("download", report_filename.slice(report_filename.lastIndexOf('/') + 1));
           document.body.appendChild(fileLink);
 
           fileLink.click();

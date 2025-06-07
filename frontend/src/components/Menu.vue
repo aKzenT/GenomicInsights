@@ -7,10 +7,6 @@
         @select="handleClick"
         router
       >
-        <el-menu-item index="UploadData">
-          <el-icon><DocumentAdd /></el-icon>
-          <span>Upload Data</span>
-        </el-menu-item>
         <el-menu-item index="StartAnalyse" >
           <el-icon><Promotion /></el-icon>
           <span>Start Analysis</span>

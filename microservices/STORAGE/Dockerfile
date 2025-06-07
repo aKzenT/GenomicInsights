@@ -3,7 +3,8 @@ FROM python:3.11
 RUN mkdir /report /api /raw
 
 COPY requirements.txt .
-
+COPY mock-results /mock-results
+COPY mock-report /mock-report
 
 RUN apt-get clean && apt-get update
 

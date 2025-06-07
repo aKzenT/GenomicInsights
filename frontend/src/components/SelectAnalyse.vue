@@ -44,34 +44,43 @@
       </el-form>
 
       <el-form v-if="active === 1">
-        <div class="stepper-form" id="fileSelect">
-          <input
-            class="searchInput"
-            type="text"
-            id="rawFilesInput"
-            @keyup="searchRawFiles"
-            placeholder="&#x1F50D; Search for raw Files..."
-          />
-          <table id="selectRawFileTable">
-            <tr class="header">
-              <th style="width: 15%">Select</th>
-              <th style="width: 90%">Filename</th>
-            </tr>
+        <div class="hdfs-browser stepper-form" id="fileSelect">
+            <h3>Select a directory or file from HDFS:</h3>
 
-            <tr v-for="rawFile in raw_files" :key="rawFile">
-              <td>
-                <input
-                  type="radio"
-                  :id="rawFile"
-                  name="workflow.name"
-                  :value="rawFile"
-                  @change="radioRawFileClick"
-                />
-              </td>
-              <td>{{ rawFile }}</td>
-            </tr>
-          </table>
-        </div>
+            <!-- Navigation bar -->
+            <div v-if="currentDir !== 'microbiome-data'" class="navigation">
+              <el-button @click="navigateUp" icon="el-icon-arrow-left" type="info" plain>
+                Back to previous directory
+              </el-button>
+            </div>
+
+            <!-- Directory/File List -->
+            <ul class="file-list">
+              <li 
+                v-for="file in currentDirFiles" 
+                :key="file.pathSuffix"
+                :class="{ selected: selectedFile === file.pathSuffix }"
+                @click="handleClick(file)"
+                @dblclick="navigateDown(file)"
+              >
+                <span class="list-item">
+                  <Folder v-if="file.type === 'DIRECTORY'" class="icon" />
+                  <Document v-else class="icon" />
+                  <strong v-if="file.type === 'DIRECTORY'">{{ file.pathSuffix }}</strong>
+                  <span v-else>{{ file.pathSuffix }}</span>
+                </span>
+              </li>
+            </ul>
+
+            <div class="upload-feedback">
+              <el-alert
+                v-if="uploadInProgress === true"
+                title="Upload in progress"
+                show-icon
+                :closable="false"
+              />
+            </div>
+          </div>
         <p v-if="dataMissing" id="dataMissingTag">Please select an entry!</p>
       </el-form>
 
@@ -94,6 +103,7 @@
     <el-button
       id="nextButton"
       type="primary"
+      :disabled="uploadInProgress"
       style="margin-top: 12px"
       @click="next"
       >Next step</el-button
@@ -118,7 +128,7 @@ const input1 = ref("");
 <script>
 import { ElNotification } from "element-plus";
 import { ElMessage, ElMessageBox } from "element-plus";
-
+import { Folder, Document } from '@element-plus/icons-vue';
 export default {
   data() {
     return {
@@ -132,10 +142,80 @@ export default {
       dataMissing: false,
       dag_run_id: "",
       active: 0,
+      currentDir: 'microbiome-data',
+      currentDirFiles: [],
+      selectedFile: null, 
+      uploadSuccessful: null,
+      isDblClick: true,
+      uploadInProgress: false,
     };
   },
-
+  components: {
+    Folder,
+    Document
+  },
   methods: {
+    async fetchHdfsFiles(dir) {
+      try {
+        const encodedDir = encodeURIComponent(dir);
+        const response = await fetch(`http://localhost:5000/getHDFSFiles/${encodedDir}`);
+        const files = await response.json();
+        this.currentDirFiles = files.files; 
+      } catch (error) {
+        console.error('Error getting the HDFS files:', error);
+      }
+    },
+
+    navigateDown(file) {
+      if (file.type === 'DIRECTORY') {
+        if (this.currentDir + '/' + file.pathSuffix !== this.currentDir) {
+          this.currentDir += `/${file.pathSuffix}`;
+          this.fetchHdfsFiles(this.currentDir);
+        }
+      }
+    },
+
+    handleClick(file) {
+      this.isDblClick = !this.isDblClick;
+      setTimeout(() => {
+        if(!this.isDblClick) {
+          this.select(file);
+        }
+        this.isDblClick = true;
+      }, 200);
+    },
+
+    select(file) {
+      this.selectedFile = file.pathSuffix;
+    },
+
+    navigateUp() {
+      const newDir = this.currentDir.substring(0, this.currentDir.lastIndexOf('/'));
+      this.currentDir = newDir || '/';
+      this.fetchHdfsFiles(this.currentDir);
+    },
+
+    async uploadSelected() {
+      if (this.selectedFile) {
+        this.uploadInProgress = true;
+        try {
+          const encodedDir = encodeURIComponent(`${this.currentDir}/${this.selectedFile}`);
+          const response = await fetch(`http://localhost:5000/downloadFromHDFS/${encodedDir}`);
+          this.uploadSuccessful = true;
+          this.radioRawFile = `${this.currentDir.slice(this.currentDir.indexOf('/') + 1)}/${this.selectedFile}`;
+          this.active++;
+          document.getElementById("nextButton").innerText = "Submit";
+          this.selectedFile = null;
+          setTimeout(() => {
+            this.uploadSuccessful = null;
+          }, 5000);
+        } catch (error) {
+          console.error('Error uploading the HDFS files:', error);
+        }
+        this.uploadInProgress = false;
+      }
+    },
+    
     searchRawFiles() {
       var input, filter, table, tr, td, i, txtValue;
       input = document.getElementById("rawFilesInput");
@@ -182,12 +262,8 @@ export default {
         this.dataMissing = true;
       } else if (this.active == 0 && this.radioDataWorkflow != "") {
         this.active++;
-      } else if (this.active == 1 && this.radioRawFile == "") {
-        document.getElementById("fileSelect").style.borderColor = "red";
-        this.dataMissing = true;
-      } else if (this.active == 1 && this.radioRawFile != "") {
-        this.active++;
-        document.getElementById("nextButton").innerText = "Submit";
+      } else if (this.active == 1) {
+        this.uploadSelected();
       } else if (this.active == 2) {
         this.active++;
         this.submitWorkflow();
@@ -296,6 +372,7 @@ export default {
 
   created() {
     this.doRequests();
+    this.fetchHdfsFiles(this.currentDir);
   },
 };
 </script>
@@ -333,5 +410,56 @@ th {
   text-align: center;
   vertical-align: middle;
   padding: 70px 0;
+}
+li {
+  cursor: pointer;
+}
+
+.hdfs-browser {
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 600px;
+  background: #fafafa;
+}
+
+.navigation {
+  margin-bottom: 16px;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+}
+
+.icon {
+  margin-right: 6px;
+  font-size: 16px;
+  width: 25px;
+  height: 25px;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+}
+
+.file-list li:hover {
+  background-color: #f5f7fa;
+}
+
+.file-list li.selected {
+  background-color: #ffe58f;
+}
+
+.upload-button {
+  margin-top: 12px;
+}
+
+.upload-feedback {
+  margin-top: 16px;
 }
 </style>

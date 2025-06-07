@@ -8,6 +8,11 @@ services:
     volumes:
       - ../../data/raw/:/raw/
       - ../../data/report/:/report/
+      - ../../data/results/:/results/
+      - ../../data/archive/:/archive/
+      - ../../data/archivematica-metadata/:/archivematica-metadata/
+      - ../../data/input/:/input/
+      - ../../data/cache/:/cache/
     ports:
       - 5000:5000
     restart: unless-stopped

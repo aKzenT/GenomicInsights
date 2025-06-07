@@ -10,6 +10,7 @@ $DC -f microservices/QIIME2/docker-compose.yml up -d
 $DC -f microservices/QPCR_AUTOMATION/docker-compose.yml up -d
 $DC -f microservices/REPORT/docker-compose.yml up -d
 $DC -f microservices/STORAGE/docker-compose.yml up -d
+$DC -f docker-hadoop/docker-compose.yml up -d
 
 curl --fail \
     --connect-timeout 5 \

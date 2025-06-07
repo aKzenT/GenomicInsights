@@ -6,7 +6,7 @@
   <div class="Content">
 
 
-  <workflow-status/>
+  <workflow-status :route="$route"/>
   </div>
 </div>
 </template>
