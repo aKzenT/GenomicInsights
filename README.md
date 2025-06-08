@@ -103,6 +103,7 @@ Then navigate to docker-hadoop and run:
 ```shell
 docker compose up -d
 ```
+You can upload data by putting it in the data/input folder of the project. 
 
 ## Use Archivematica as archival system
 Software dependencies: Docker Engine, Docker Compose, git and make. Please use a version of Docker Engine greater than 23.0 which includes Buildkit as the
@@ -201,6 +202,8 @@ After completing the `.env` file, download the `processingMCP.xml` from the Arch
    Rename the file to `processingMCP.xml` and save it in the `data/archivematica-metadata` folder.
 
 [archivematica-install]: https://github.com/artefactual/archivematica/blob/qa/1.x/hack/README.md
+
+You can archive data by putting it in the data/archive folder of the project.
 
 ## Running qPCR analysis workflow
 TODO
